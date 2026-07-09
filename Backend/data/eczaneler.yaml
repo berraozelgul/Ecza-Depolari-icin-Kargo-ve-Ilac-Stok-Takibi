@@ -1,0 +1,47 @@
+- eczaneAdi: Yılmaz Eczanesi
+  yetkiliKisi: Ahmet Yılmaz
+  telefon: "0232 123 45 67"
+  adres: "Bornova, İzmir"
+  vergiNo: "1234567890"
+
+- eczaneAdi: Merkez Eczanesi
+  yetkiliKisi: Fatma Kaya
+  telefon: "0232 234 56 78"
+  adres: "Konak, İzmir"
+  vergiNo: "2345678901"
+
+- eczaneAdi: Deniz Eczanesi
+  yetkiliKisi: Mehmet Deniz
+  telefon: "0232 345 67 89"
+  adres: "Karşıyaka, İzmir"
+  vergiNo: "3456789012"
+
+- eczaneAdi: Sağlık Eczanesi
+  yetkiliKisi: Ayşe Sağlık
+  telefon: "0232 456 78 90"
+  adres: "Buca, İzmir"
+  vergiNo: "4567890123"
+
+- eczaneAdi: Umut Eczanesi
+  yetkiliKisi: Can Umut
+  telefon: "0232 567 89 01"
+  adres: "Çiğli, İzmir"
+  vergiNo: "5678901234"
+
+- eczaneAdi: Yaşam Eczanesi
+  yetkiliKisi: Zeynep Yaşam
+  telefon: "0232 678 90 12"
+  adres: "Gaziemir, İzmir"
+  vergiNo: "6789012345"
+
+- eczaneAdi: Şifa Eczanesi
+  yetkiliKisi: Emre Şifa
+  telefon: "0232 789 01 23"
+  adres: "Bayraklı, İzmir"
+  vergiNo: "7890123456"
+
+- eczaneAdi: Anadolu Eczanesi
+  yetkiliKisi: Selin Anadolu
+  telefon: "0232 890 12 34"
+  adres: "Balçova, İzmir"
+  vergiNo: "8901234567"

@@ -1,0 +1,139 @@
+- ilacAdi: Parol 500mg 20 Tablet
+  barkod: "8699514080335"
+  stokMiktari: 150
+  kritikStokSeviyesi: 20
+  sonKullanmaTarihi: "2027-03-15"
+  birimFiyat: 24.50
+
+- ilacAdi: Augmentin BID 1000mg 14 Tablet
+  barkod: "8699536090123"
+  stokMiktari: 80
+  kritikStokSeviyesi: 15
+  sonKullanmaTarihi: "2026-11-20"
+  birimFiyat: 112.75
+
+- ilacAdi: Nurofen 400mg 24 Tablet
+  barkod: "8699546012345"
+  stokMiktari: 200
+  kritikStokSeviyesi: 30
+  sonKullanmaTarihi: "2027-06-10"
+  birimFiyat: 38.90
+
+- ilacAdi: Aspirin 500mg 20 Tablet
+  barkod: "8699568023456"
+  stokMiktari: 5
+  kritikStokSeviyesi: 25
+  sonKullanmaTarihi: "2026-09-01"
+  birimFiyat: 19.00
+
+- ilacAdi: Voltaren Emulgel 50g
+  barkod: "8699504011122"
+  stokMiktari: 60
+  kritikStokSeviyesi: 10
+  sonKullanmaTarihi: "2027-01-25"
+  birimFiyat: 89.90
+
+- ilacAdi: Coraspin 100mg 30 Tablet
+  barkod: "8699591022334"
+  stokMiktari: 120
+  kritikStokSeviyesi: 20
+  sonKullanmaTarihi: "2027-04-18"
+  birimFiyat: 27.40
+
+- ilacAdi: Cipro 500mg 10 Tablet
+  barkod: "8699809033445"
+  stokMiktari: 45
+  kritikStokSeviyesi: 15
+  sonKullanmaTarihi: "2026-12-05"
+  birimFiyat: 65.00
+
+- ilacAdi: Ventolin İnhaler 100mcg
+  barkod: "8699556044556"
+  stokMiktari: 8
+  kritikStokSeviyesi: 12
+  sonKullanmaTarihi: "2026-08-30"
+  birimFiyat: 78.30
+
+- ilacAdi: Xanax 0.5mg 30 Tablet
+  barkod: "8699278055667"
+  stokMiktari: 30
+  kritikStokSeviyesi: 10
+  sonKullanmaTarihi: "2027-02-14"
+  birimFiyat: 42.60
+
+- ilacAdi: Concor 5mg 28 Tablet
+  barkod: "8699828066778"
+  stokMiktari: 55
+  kritikStokSeviyesi: 15
+  sonKullanmaTarihi: "2027-05-22"
+  birimFiyat: 58.20
+
+- ilacAdi: Glucophage 1000mg 100 Tablet
+  barkod: "8699839077889"
+  stokMiktari: 90
+  kritikStokSeviyesi: 20
+  sonKullanmaTarihi: "2026-10-11"
+  birimFiyat: 71.50
+
+- ilacAdi: Lipitor 20mg 30 Tablet
+  barkod: "8699725088990"
+  stokMiktari: 40
+  kritikStokSeviyesi: 15
+  sonKullanmaTarihi: "2027-07-03"
+  birimFiyat: 95.00
+
+- ilacAdi: Nexium 40mg 28 Tablet
+  barkod: "8699522099001"
+  stokMiktari: 3
+  kritikStokSeviyesi: 15
+  sonKullanmaTarihi: "2026-08-15"
+  birimFiyat: 112.00
+
+- ilacAdi: Panadol Extra 24 Tablet
+  barkod: "8699633010012"
+  stokMiktari: 180
+  kritikStokSeviyesi: 25
+  sonKullanmaTarihi: "2027-03-28"
+  birimFiyat: 22.75
+
+- ilacAdi: Majezik 100mg 10 Tablet
+  barkod: "8699743021023"
+  stokMiktari: 100
+  kritikStokSeviyesi: 20
+  sonKullanmaTarihi: "2026-11-30"
+  birimFiyat: 33.40
+
+- ilacAdi: Talcid 500mg 20 Çiğneme Tablet
+  barkod: "8699754032034"
+  stokMiktari: 70
+  kritikStokSeviyesi: 15
+  sonKullanmaTarihi: "2027-01-09"
+  birimFiyat: 41.90
+
+- ilacAdi: Dolorex 550mg 20 Tablet
+  barkod: "8699765043045"
+  stokMiktari: 65
+  kritikStokSeviyesi: 15
+  sonKullanmaTarihi: "2026-12-19"
+  birimFiyat: 29.60
+
+- ilacAdi: Betaserc 24mg 30 Tablet
+  barkod: "8699776054056"
+  stokMiktari: 25
+  kritikStokSeviyesi: 10
+  sonKullanmaTarihi: "2027-04-07"
+  birimFiyat: 63.80
+
+- ilacAdi: Zyrtec 10mg 20 Tablet
+  barkod: "8699787065067"
+  stokMiktari: 50
+  kritikStokSeviyesi: 15
+  sonKullanmaTarihi: "2027-06-25"
+  birimFiyat: 47.20
+
+- ilacAdi: Rinoxal Burun Spreyi
+  barkod: "8699798076078"
+  stokMiktari: 4
+  kritikStokSeviyesi: 10
+  sonKullanmaTarihi: "2026-09-12"
+  birimFiyat: 34.10
