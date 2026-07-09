@@ -1,0 +1,1 @@
+# Ecza-Depolari-icin-Kargo-ve-Ilac-Stok-Takibi
