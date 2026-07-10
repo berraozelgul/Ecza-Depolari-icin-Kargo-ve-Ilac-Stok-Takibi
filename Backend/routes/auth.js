@@ -10,8 +10,8 @@ const yetkiKontrol=require('../middleware/yetkiKontrol');
 
 // brute-force koruması: 15 dakikada aynı IP'den en fazla 10 giriş/kayıt denemesi
 const girisLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 10,
+    windowMs: 60 * 1000,
+max: 30,
     message: { mesaj: 'Çok fazla deneme yaptınız, lütfen daha sonra tekrar deneyin' },
     standardHeaders: true,
     legacyHeaders: false
