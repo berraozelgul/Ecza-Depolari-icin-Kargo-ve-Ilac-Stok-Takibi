@@ -14,7 +14,7 @@ api.interceptors.request.use((config)=>{//her istek gönderilmeden hemen önce �
 });
 export default api;*/
 //amaç:login sayfası dışındaki tüm sayfalarda tokenı manuel eklemekle uğraşmamak bir kere login olduktan sonra tüm istekler otomatik olarak tokenlı gidiyor.
-import axios from 'axios';
+/*import axios from 'axios';
 
 const api=axios.create({
     baseURL: '/api'
@@ -28,5 +28,21 @@ api.interceptors.request.use((config)=>{//her istek gönderilmeden hemen önce �
     }
     return config;//değişiklik yapılmış isteği geri döndürüyor böylece istek normal şekilde gönderiliyor.
 });
-export default api;
+export default api;*/
 //amaç:login sayfası dışındaki tüm sayfalarda tokenı manuel eklemekle uğraşmamak bir kere login olduktan sonra tüm istekler otomatik olarak tokenlı gidiyor.c
+
+import axios from 'axios';
+
+const api = axios.create({
+    baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
+});
+
+api.interceptors.request.use((config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+});
+
+export default api;
