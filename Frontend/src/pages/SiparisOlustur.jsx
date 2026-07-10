@@ -11,6 +11,8 @@ function SiparisOlustur() {
   const [hata, setHata] = useState('');
   const navigate = useNavigate();
   const showToast = useToast();
+  const role = localStorage.getItem('role');
+  const kendiEczaneMi = role === 'eczane';
 
   useEffect(() => {
     const verileriGetir = async () => {
@@ -21,12 +23,16 @@ function SiparisOlustur() {
         ]);
         setEczaneler(eczaneRes.data);
         setIlaclar(ilacRes.data);
+        // eczane rolündeyse tek eczane döner, otomatik seç
+        if (kendiEczaneMi && eczaneRes.data.length === 1) {
+          setSeciliEczane(eczaneRes.data[0]._id);
+        }
       } catch (err) {
         console.error('Veriler getirilemedi:', err);
       }
     };
     verileriGetir();
-  }, []);
+  }, [kendiEczaneMi]);
 
   const urunEkle = () => {
     setUrunler([...urunler, { ilac: '', miktar: 1 }]);
@@ -46,7 +52,7 @@ function SiparisOlustur() {
     e.preventDefault();
     setHata('');
 
-    if (!seciliEczane) {
+    if (!kendiEczaneMi && !seciliEczane) {
       setHata('Lütfen bir eczane seçin');
       return;
     }
@@ -57,11 +63,11 @@ function SiparisOlustur() {
 
     try {
       await api.post('/siparis', {
-        eczane: seciliEczane,
+        eczane: seciliEczane, // eczane rolündeyse backend zaten bunu yok sayıp kendi eczanesini kullanır
         urunler: urunler.map((u) => ({ ilac: u.ilac, miktar: Number(u.miktar) }))
       });
       showToast('Sipariş başarıyla oluşturuldu', 'success');
-      setSeciliEczane('');
+      setSeciliEczane(kendiEczaneMi ? seciliEczane : '');
       setUrunler([{ ilac: '', miktar: 1 }]);
       navigate('/siparisler');
     } catch (err) {
@@ -80,15 +86,17 @@ function SiparisOlustur() {
 
       <div className="card" style={{ padding: '28px' }}>
         <form onSubmit={handleSubmit}>
-          <div className="field">
-            <label className="label">Eczane</label>
-            <select className="input" value={seciliEczane} onChange={(e) => setSeciliEczane(e.target.value)} required>
-              <option value="">-- Eczane Seçin --</option>
-              {eczaneler.map((e) => (
-                <option key={e._id} value={e._id}>{e.eczaneAdi}</option>
-              ))}
-            </select>
-          </div>
+          {!kendiEczaneMi && (
+            <div className="field">
+              <label className="label">Eczane</label>
+              <select className="input" value={seciliEczane} onChange={(e) => setSeciliEczane(e.target.value)} required>
+                <option value="">-- Eczane Seçin --</option>
+                {eczaneler.map((e) => (
+                  <option key={e._id} value={e._id}>{e.eczaneAdi}</option>
+                ))}
+              </select>
+            </div>
+          )}
 
           <label className="label">Ürünler</label>
           {urunler.map((urun, index) => (

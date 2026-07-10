@@ -13,6 +13,11 @@ const userSchema = new mongoose.Schema({
   role: {
     type: String,
     default: 'personel'
+  },
+  eczane: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Eczane',
+    default: null
   }
 }, { timestamps: true });
 

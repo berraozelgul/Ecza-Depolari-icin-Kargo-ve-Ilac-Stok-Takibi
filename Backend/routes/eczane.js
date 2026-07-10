@@ -5,8 +5,17 @@ const Eczane = require('../models/Eczane');
 const auth = require('../middleware/auth');
 
 // TÜM ECZANELERİ LİSTELE (arama destekli)
+// personel: hepsini görür / eczane: sadece kendi kaydını görür
 router.get('/', auth, async (req, res) => {
   try {
+    if (req.user.role === 'eczane') {
+      if (!req.user.eczane) {
+        return res.json([]);
+      }
+      const kendiEczanem = await Eczane.findById(req.user.eczane);
+      return res.json(kendiEczanem ? [kendiEczanem] : []);
+    }
+
     const { arama } = req.query;
     const filtre = {};
 
@@ -37,7 +46,7 @@ router.post('/', auth, yetkiKontrol('personel'), async (req, res) => {
 });
 
 // ECZANE GÜNCELLE
-router.put('/:id', auth, async (req, res) => {
+router.put('/:id', auth, yetkiKontrol('personel'), async (req, res) => {
   try {
     const guncelEczane = await Eczane.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!guncelEczane) {
@@ -48,6 +57,7 @@ router.put('/:id', auth, async (req, res) => {
     res.status(500).json({ mesaj: 'Sunucu hatası', hata: err.message });
   }
 });
+
 // TEK ECZANEYİ GETİR (düzenleme formu için)
 router.get('/:id', auth, async (req, res) => {
   try {
@@ -62,7 +72,7 @@ router.get('/:id', auth, async (req, res) => {
 });
 
 // ECZANE SİL
-router.delete('/:id', auth, async (req, res) => {
+router.delete('/:id', auth, yetkiKontrol('personel'), async (req, res) => {
   try {
     const silinen = await Eczane.findByIdAndDelete(req.params.id);
     if (!silinen) {

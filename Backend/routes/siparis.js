@@ -8,9 +8,18 @@ const Ilac = require('../models/Ilac');
 const auth = require('../middleware/auth');
 
 // SİPARİŞLERİ LİSTELE
+// personel: hepsini görür / eczane: sadece kendi siparişlerini görür
 router.get('/', auth, async (req, res) => {
   try {
-    const siparisler = await Siparis.find()
+    const filtre = {};
+    if (req.user.role === 'eczane') {
+      if (!req.user.eczane) {
+        return res.json([]);
+      }
+      filtre.eczane = req.user.eczane;
+    }
+
+    const siparisler = await Siparis.find(filtre)
       .populate('eczane')
       .populate('urunler.ilac')
       .sort({ createdAt: -1 });
@@ -21,9 +30,19 @@ router.get('/', auth, async (req, res) => {
 });
 
 // YENİ SİPARİŞ OLUŞTUR
+// personel: istediği eczane adına sipariş açabilir / eczane: sadece kendi adına
 router.post('/', auth, async (req, res) => {
   try {
-    const { eczane, urunler } = req.body;
+    const { urunler } = req.body;
+    let { eczane } = req.body;
+
+    if (req.user.role === 'eczane') {
+      if (!req.user.eczane) {
+        return res.status(400).json({ mesaj: 'Hesabınıza bağlı bir eczane kaydı bulunamadı' });
+      }
+      eczane = req.user.eczane; // kullanıcının gönderdiği değeri yok say, kendi eczanesini zorla
+    }
+
     const yeniSiparis = new Siparis({ eczane, urunler });
     await yeniSiparis.save();
     res.status(201).json({ mesaj: 'Sipariş oluşturuldu', siparis: yeniSiparis });

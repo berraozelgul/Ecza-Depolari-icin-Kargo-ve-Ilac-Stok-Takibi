@@ -40,7 +40,7 @@ router.post('/', auth, yetkiKontrol('personel'), async (req, res) => {
 });
 
 // İLAÇ GÜNCELLE
-router.put('/:id', auth, async (req, res) => {
+router.put('/:id', auth, yetkiKontrol('personel'), async (req, res) => {
   try {
     const guncelIlac = await Ilac.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!guncelIlac) {
@@ -51,6 +51,7 @@ router.put('/:id', auth, async (req, res) => {
     res.status(500).json({ mesaj: 'Sunucu hatası', hata: err.message });
   }
 });
+
 // TEK İLACI GETİR (düzenleme formu için)
 router.get('/:id', auth, async (req, res) => {
   try {
@@ -63,8 +64,9 @@ router.get('/:id', auth, async (req, res) => {
     res.status(500).json({ mesaj: 'Sunucu hatası', hata: err.message });
   }
 });
+
 // İLAÇ SİL
-router.delete('/:id', auth, async (req, res) => {
+router.delete('/:id', auth, yetkiKontrol('personel'), async (req, res) => {
   try {
     const silinen = await Ilac.findByIdAndDelete(req.params.id);
     if (!silinen) {
