@@ -21,7 +21,9 @@ function Navbar() {
         <div className="navbar-brand">KargoTakip</div>
         <div className="navbar-links">
           <NavLink to="/dashboard" className={linkClass}>Dashboard</NavLink>
-          <NavLink to="/kargolar" className={linkClass}>Kargolar</NavLink>
+          {role === 'personel' && (
+            <NavLink to="/kargolar" className={linkClass}>Kargolar</NavLink>
+          )}
           {role === 'personel' && (
             <NavLink to="/ilaclar" className={linkClass}>İlaç Stok</NavLink>
           )}

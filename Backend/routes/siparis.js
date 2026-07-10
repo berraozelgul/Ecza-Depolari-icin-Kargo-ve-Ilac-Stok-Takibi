@@ -22,6 +22,7 @@ router.get('/', auth, async (req, res) => {
     const siparisler = await Siparis.find(filtre)
       .populate('eczane')
       .populate('urunler.ilac')
+      .populate('kargo')
       .sort({ createdAt: -1 });
     res.json(siparisler);
   } catch (err) {

@@ -3,11 +3,17 @@ dns.setServers(['8.8.8.8', '8.8.4.4']);
 const express=require("express");
 const mongoose=require("mongoose");
 const cors=require("cors");
+const helmet=require("helmet");
 require("dotenv").config();
 const app=express();
 
 
-app.use(cors());
+app.use(helmet());
+app.use(cors({
+    // FRONTEND_URL .env'de tanımlıysa sadece o origin'e izin verilir.
+    // Tanımlı değilse (yerel geliştirme) tüm origin'lere izin verir.
+    origin: process.env.FRONTEND_URL || true
+}));
 app.use(express.json());
 app.use('/api/siparis', require('./routes/siparis'));
 app.use('/api/eczane', require('./routes/eczane'));

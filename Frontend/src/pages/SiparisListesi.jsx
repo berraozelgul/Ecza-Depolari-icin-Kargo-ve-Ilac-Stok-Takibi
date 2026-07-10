@@ -1,5 +1,5 @@
 import { useToast } from '../context/ToastContext';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Fragment } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 
@@ -7,8 +7,11 @@ function SiparisListesi() {
   const [siparisler, setSiparisler] = useState([]);
   const [yukleniyor, setYukleniyor] = useState(true);
   const [onaylananId, setOnaylananId] = useState(null);
+  const [acikDetayId, setAcikDetayId] = useState(null);
   const navigate = useNavigate();
   const showToast = useToast();
+  const role = localStorage.getItem('role');
+  const personelMi = role === 'personel';
 
   const siparisleriGetir = async () => {
     setYukleniyor(true);
@@ -46,6 +49,20 @@ function SiparisListesi() {
     return {};
   };
 
+  const kargoDurumRengi = (durum) => {
+    if (durum === 'Teslim Edildi') return { color: 'green', fontWeight: 600 };
+    if (durum === 'İptal') return { color: 'crimson' };
+    if (durum === 'Hazırlanıyor') return { color: '#b8860b' };
+    return { color: '#2563eb' }; // Kargoya Verildi / Yolda / Dağıtımda
+  };
+
+  const detayToggle = (id) => {
+    setAcikDetayId(acikDetayId === id ? null : id);
+  };
+
+  const paraFormat = (deger) =>
+    (deger ?? 0).toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' });
+
   return (
     <div className="page">
       <div className="page-header">
@@ -68,32 +85,106 @@ function SiparisListesi() {
               <tr>
                 <th>Eczane</th>
                 <th>Ürün Sayısı</th>
-                <th>Durum</th>
+                <th>Sipariş Durumu</th>
+                <th>Kargo Durumu</th>
                 <th>Tarih</th>
                 <th>İşlem</th>
               </tr>
             </thead>
             <tbody>
               {siparisler.map((siparis) => (
-                <tr key={siparis._id}>
-                  <td>{siparis.eczane?.eczaneAdi || '—'}</td>
-                  <td>{siparis.urunler.length}</td>
-                  <td style={durumRengi(siparis.durum)}>{siparis.durum}</td>
-                  <td>{new Date(siparis.createdAt).toLocaleDateString('tr-TR')}</td>
-                  <td>
-                    {siparis.durum === 'Beklemede' ? (
+                <Fragment key={siparis._id}>
+                  <tr key={siparis._id}>
+                    <td>{siparis.eczane?.eczaneAdi || '—'}</td>
+                    <td>
                       <button
-                        className="btn btn-primary"
-                        onClick={() => siparisiOnayla(siparis._id)}
-                        disabled={onaylananId === siparis._id}
+                        type="button"
+                        onClick={() => detayToggle(siparis._id)}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          padding: 0,
+                          cursor: 'pointer',
+                          color: 'var(--color-primary-dark)',
+                          textDecoration: 'underline',
+                          fontSize: 'inherit'
+                        }}
                       >
-                        {onaylananId === siparis._id ? 'Onaylanıyor...' : 'Onayla ve Sevk Et'}
+                        {siparis.urunler.length} ürün {acikDetayId === siparis._id ? '▲' : '▼'}
                       </button>
-                    ) : (
-                      <span style={{ color: '#888' }}>—</span>
-                    )}
-                  </td>
-                </tr>
+                    </td>
+                    <td style={durumRengi(siparis.durum)}>{siparis.durum}</td>
+                    <td>
+                      {siparis.kargo ? (
+                        <span style={kargoDurumRengi(siparis.kargo.durum)}>
+                          {siparis.kargo.durum}
+                          <span style={{ color: '#888', fontWeight: 400 }}> ({siparis.kargo.takipNo})</span>
+                        </span>
+                      ) : (
+                        <span style={{ color: '#888' }}>—</span>
+                      )}
+                    </td>
+                    <td>{new Date(siparis.createdAt).toLocaleDateString('tr-TR')}</td>
+                    <td>
+                      {siparis.durum === 'Beklemede' && personelMi ? (
+                        <button
+                          className="btn btn-primary"
+                          onClick={() => siparisiOnayla(siparis._id)}
+                          disabled={onaylananId === siparis._id}
+                        >
+                          {onaylananId === siparis._id ? 'Onaylanıyor...' : 'Onayla ve Sevk Et'}
+                        </button>
+                      ) : (
+                        <span style={{ color: '#888' }}>
+                          {siparis.durum === 'Beklemede' ? 'Onay bekleniyor' : '—'}
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                  {acikDetayId === siparis._id && (
+                    <tr key={`${siparis._id}-detay`}>
+                      <td colSpan={6} style={{ background: 'var(--color-bg)', padding: '16px 20px' }}>
+                        <table style={{ width: '100%' }}>
+                          <thead>
+                            <tr>
+                              <th style={{ fontSize: '12px', color: 'var(--color-text-muted)', textAlign: 'left' }}>İlaç</th>
+                              <th style={{ fontSize: '12px', color: 'var(--color-text-muted)', textAlign: 'right' }}>Miktar</th>
+                              <th style={{ fontSize: '12px', color: 'var(--color-text-muted)', textAlign: 'right' }}>Birim Fiyat</th>
+                              <th style={{ fontSize: '12px', color: 'var(--color-text-muted)', textAlign: 'right' }}>Tutar</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {siparis.urunler.map((kalem, i) => (
+                              <tr key={i}>
+                                <td>{kalem.ilac?.ilacAdi || '(silinmiş ilaç)'}</td>
+                                <td style={{ textAlign: 'right' }}>{kalem.miktar}</td>
+                                <td style={{ textAlign: 'right' }}>{paraFormat(kalem.ilac?.birimFiyat)}</td>
+                                <td style={{ textAlign: 'right' }}>
+                                  {paraFormat((kalem.ilac?.birimFiyat || 0) * kalem.miktar)}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                          <tfoot>
+                            <tr>
+                              <td colSpan={3} style={{ textAlign: 'right', fontWeight: 600, paddingTop: '8px' }}>
+                                Toplam
+                              </td>
+                              <td style={{ textAlign: 'right', fontWeight: 600, paddingTop: '8px' }}>
+                                {paraFormat(
+                                  siparis.urunler.reduce(
+                                    (toplam, kalem) => toplam + (kalem.ilac?.birimFiyat || 0) * kalem.miktar,
+                                    0
+                                  )
+                                )}
+                              </td>
+                            </tr>
+                          </tfoot>
+                        </table>
+                      </td>
+                    </tr>
+                  )}
+                </Fragment>
               ))}
             </tbody>
           </table>

@@ -6,7 +6,6 @@ import { useTheme } from '../hooks/useTheme';
 function Register() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState('personel');
   const [eczaneAdi, setEczaneAdi] = useState('');
   const [yetkiliKisi, setYetkiliKisi] = useState('');
   const [telefon, setTelefon] = useState('');
@@ -21,10 +20,7 @@ function Register() {
     e.preventDefault();
     setHata('');
     try {
-      const gonderilecek = { username, password, role };
-      if (role === 'eczane') {
-        Object.assign(gonderilecek, { eczaneAdi, yetkiliKisi, telefon, adres, vergiNo });
-      }
+      const gonderilecek = { username, password, eczaneAdi, yetkiliKisi, telefon, adres, vergiNo };
       await api.post('/auth/register', gonderilecek);
       setBasarili(true);
       setTimeout(() => navigate('/giris'), 1200);
@@ -40,7 +36,7 @@ function Register() {
           {theme === 'light' ? '🌙' : '☀️'}
         </button>
         <div className="login-eyebrow">Ecza Deposu</div>
-        <h2>Kayıt Ol</h2>
+        <h2>Eczane Kaydı</h2>
         <form onSubmit={handleSubmit}>
           <div className="field">
             <label className="label">Kullanıcı adı</label>
@@ -51,37 +47,25 @@ function Register() {
             <input type="password" className="input" value={password} onChange={(e) => setPassword(e.target.value)} required />
           </div>
           <div className="field">
-            <label className="label">Hesap Türü</label>
-            <select className="input" value={role} onChange={(e) => setRole(e.target.value)}>
-              <option value="personel">Depo Personeli</option>
-              <option value="eczane">Eczane</option>
-            </select>
+            <label className="label">Eczane Adı</label>
+            <input type="text" className="input" value={eczaneAdi} onChange={(e) => setEczaneAdi(e.target.value)} required />
           </div>
-
-          {role === 'eczane' && (
-            <>
-              <div className="field">
-                <label className="label">Eczane Adı</label>
-                <input type="text" className="input" value={eczaneAdi} onChange={(e) => setEczaneAdi(e.target.value)} required />
-              </div>
-              <div className="field">
-                <label className="label">Yetkili Kişi</label>
-                <input type="text" className="input" value={yetkiliKisi} onChange={(e) => setYetkiliKisi(e.target.value)} />
-              </div>
-              <div className="field">
-                <label className="label">Telefon</label>
-                <input type="text" className="input" value={telefon} onChange={(e) => setTelefon(e.target.value)} />
-              </div>
-              <div className="field">
-                <label className="label">Adres</label>
-                <input type="text" className="input" value={adres} onChange={(e) => setAdres(e.target.value)} required />
-              </div>
-              <div className="field">
-                <label className="label">Vergi No</label>
-                <input type="text" className="input" value={vergiNo} onChange={(e) => setVergiNo(e.target.value)} />
-              </div>
-            </>
-          )}
+          <div className="field">
+            <label className="label">Yetkili Kişi</label>
+            <input type="text" className="input" value={yetkiliKisi} onChange={(e) => setYetkiliKisi(e.target.value)} />
+          </div>
+          <div className="field">
+            <label className="label">Telefon</label>
+            <input type="text" className="input" value={telefon} onChange={(e) => setTelefon(e.target.value)} />
+          </div>
+          <div className="field">
+            <label className="label">Adres</label>
+            <input type="text" className="input" value={adres} onChange={(e) => setAdres(e.target.value)} required />
+          </div>
+          <div className="field">
+            <label className="label">Vergi No</label>
+            <input type="text" className="input" value={vergiNo} onChange={(e) => setVergiNo(e.target.value)} />
+          </div>
 
           {hata && <div className="alert alert-error">{hata}</div>}
           {basarili && <div className="alert alert-success">Kayıt başarılı! Giriş sayfasına yönlendiriliyorsunuz...</div>}

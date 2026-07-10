@@ -59,8 +59,13 @@ router.put('/:id', auth, yetkiKontrol('personel'), async (req, res) => {
 });
 
 // TEK ECZANEYİ GETİR (düzenleme formu için)
+// personel: herhangi bir eczaneyi görür / eczane: sadece kendi kaydını görür
 router.get('/:id', auth, async (req, res) => {
   try {
+    if (req.user.role === 'eczane' && String(req.user.eczane) !== req.params.id) {
+      return res.status(403).json({ mesaj: 'Bu işlem için yetkiniz yok' });
+    }
+
     const eczane = await Eczane.findById(req.params.id);
     if (!eczane) {
       return res.status(404).json({ mesaj: 'Eczane bulunamadı' });

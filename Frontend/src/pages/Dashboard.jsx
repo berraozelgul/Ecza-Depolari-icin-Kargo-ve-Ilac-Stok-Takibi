@@ -12,10 +12,10 @@ const DURUM_RENK = {
 };
 
 const AKIS_ADIMLARI = [
-  { key: 'eczane', baslik: 'Eczane', aciklama: 'Kayıtlı müşteri', sayfa: '/eczaneler', sadecePersonel: true },
-  { key: 'siparis', baslik: 'Sipariş', aciklama: 'Beklemede', sayfa: '/siparisler', sadecePersonel: false },
-  { key: 'stok', baslik: 'Depo', aciklama: 'Onaylanır, stok düşer', sayfa: '/ilaclar', sadecePersonel: true },
-  { key: 'kargo', baslik: 'Sevkiyat', aciklama: 'Takip edilir', sayfa: '/kargolar', sadecePersonel: false }
+  { key: 'eczane', baslik: 'Eczane', aciklama: 'Kayıtlı müşteri', sayfa: '/eczaneler' },
+  { key: 'siparis', baslik: 'Sipariş', aciklama: 'Beklemede', sayfa: '/siparisler' },
+  { key: 'stok', baslik: 'Depo', aciklama: 'Onaylanır, stok düşer', sayfa: '/ilaclar' },
+  { key: 'kargo', baslik: 'Sevkiyat', aciklama: 'Takip edilir', sayfa: '/kargolar' }
 ];
 
 function Dashboard() {
@@ -24,16 +24,18 @@ function Dashboard() {
   const [eczaneSayisi, setEczaneSayisi] = useState(0);
   const [kritikStokSayisi, setKritikStokSayisi] = useState(0);
   const [bekleyenSiparisSayisi, setBekleyenSiparisSayisi] = useState(0);
+  const [siparislerim, setSiparislerim] = useState([]);
   const navigate = useNavigate();
   const role = localStorage.getItem('role');
+  const personelMi = role === 'personel';
 
   useEffect(() => {
-    api.get('/kargo/istatistik/ozet')
-      .then((res) => setOzet(res.data))
-      .catch((err) => console.error('İstatistik getirilemedi:', err))
-      .finally(() => setYukleniyor(false));
+    if (personelMi) {
+      api.get('/kargo/istatistik/ozet')
+        .then((res) => setOzet(res.data))
+        .catch((err) => console.error('İstatistik getirilemedi:', err))
+        .finally(() => setYukleniyor(false));
 
-    if (role === 'personel') {
       api.get('/ilac')
         .then((res) => {
           const kritik = res.data.filter((i) => i.stokMiktari <= i.kritikStokSeviyesi).length;
@@ -44,15 +46,18 @@ function Dashboard() {
       api.get('/eczane')
         .then((res) => setEczaneSayisi(res.data.length))
         .catch((err) => console.error('Eczaneler getirilemedi:', err));
+    } else {
+      setYukleniyor(false);
     }
 
     api.get('/siparis')
       .then((res) => {
         const bekleyen = res.data.filter((s) => s.durum === 'Beklemede').length;
         setBekleyenSiparisSayisi(bekleyen);
+        setSiparislerim(res.data);
       })
       .catch((err) => console.error('Siparişler getirilemedi:', err));
-  }, [role]);
+  }, [personelMi]);
 
   const akisSayilari = {
     eczane: eczaneSayisi,
@@ -65,12 +70,87 @@ function Dashboard() {
     return <div className="page"><div className="empty-state">Yükleniyor...</div></div>;
   }
 
+  // ECZANE ROLÜ: sadece sipariş odaklı sade bir görünüm
+  if (!personelMi) {
+    const aktifSevkiyatlar = siparislerim
+      .filter((s) => s.kargo)
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      .slice(0, 5);
+
+    return (
+      <div className="page">
+        <div className="page-header">
+          <h2>Dashboard</h2>
+        </div>
+
+        <div className="card" style={{ padding: '24px', marginBottom: '20px' }}>
+          <div style={{ fontSize: '13px', color: 'var(--color-text-muted)', fontWeight: 600 }}>
+            BEKLEYEN SİPARİŞİM
+          </div>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: '40px', color: 'var(--color-primary-dark)', marginTop: '4px' }}>
+            {bekleyenSiparisSayisi}
+          </div>
+        </div>
+
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+          gap: '10px',
+          marginBottom: '20px'
+        }}>
+          <button className="btn btn-primary" onClick={() => navigate('/siparis-olustur')}>
+            + Yeni Sipariş
+          </button>
+          <button className="btn btn-ghost" onClick={() => navigate('/siparisler')}>
+            Siparişlerim
+          </button>
+        </div>
+
+        <div className="card" style={{ padding: '24px' }}>
+          <h3 style={{ fontSize: '15px', marginBottom: '18px' }}>Aktif Sevkiyatlarım</h3>
+          {aktifSevkiyatlar.length === 0 ? (
+            <div className="empty-state">Henüz sevkiyata çıkan bir siparişin yok.</div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              {aktifSevkiyatlar.map((s) => (
+                <div
+                  key={s._id}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }}
+                  onClick={() => navigate('/siparisler')}
+                >
+                  <div>
+                    <div style={{ fontSize: '13px', fontWeight: 600 }}>{s.kargo.takipNo}</div>
+                    <div style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>
+                      {new Date(s.createdAt).toLocaleDateString('tr-TR')} · {s.urunler.length} ürün
+                    </div>
+                  </div>
+                  <div
+                    style={{
+                      fontSize: '12px',
+                      fontWeight: 600,
+                      padding: '4px 10px',
+                      borderRadius: '999px',
+                      color: '#fff',
+                      background: DURUM_RENK[s.kargo.durum] || '#888'
+                    }}
+                  >
+                    {s.kargo.durum}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // PERSONEL ROLÜ: tam süreç akışı
   if (!ozet) {
     return <div className="page"><div className="empty-state">İstatistikler yüklenemedi.</div></div>;
   }
 
   const maxDeger = Math.max(...Object.values(ozet.durumDagilimi), 1);
-  const gorunecekAdimlar = AKIS_ADIMLARI.filter((adim) => !adim.sadecePersonel || role === 'personel');
 
   return (
     <div className="page">
@@ -78,29 +158,24 @@ function Dashboard() {
         <h2>Dashboard</h2>
       </div>
 
-      {/* Süreç akışı: tek bakışta sistemin tamamı */}
       <div className="card" style={{ padding: '24px', marginBottom: '20px' }}>
         <div style={{ fontSize: '13px', color: 'var(--color-text-muted)', fontWeight: 600, marginBottom: '18px' }}>
           SÜREÇ AKIŞI
         </div>
         <div className="akis-satiri">
-          {gorunecekAdimlar.map((adim, i) => (
+          {AKIS_ADIMLARI.map((adim, i) => (
             <div key={adim.key} style={{ display: 'flex', alignItems: 'center', flex: 1 }}>
-              <div
-                className="akis-adim"
-                onClick={() => navigate(adim.sayfa)}
-              >
+              <div className="akis-adim" onClick={() => navigate(adim.sayfa)}>
                 <div className="akis-adim-sayi">{akisSayilari[adim.key]}</div>
                 <div className="akis-adim-baslik">{adim.baslik}</div>
                 <div className="akis-adim-aciklama">{adim.aciklama}</div>
               </div>
-              {i < gorunecekAdimlar.length - 1 && <div className="akis-ok">→</div>}
+              {i < AKIS_ADIMLARI.length - 1 && <div className="akis-ok">→</div>}
             </div>
           ))}
         </div>
       </div>
 
-      {/* Hızlı işlemler */}
       <div style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
@@ -110,16 +185,12 @@ function Dashboard() {
         <button className="btn btn-primary" onClick={() => navigate('/siparis-olustur')}>
           + Yeni Sipariş
         </button>
-        {role === 'personel' && (
-          <>
-            <button className="btn btn-secondary" onClick={() => navigate('/ilac-ekle')}>
-              + Stok Ekle
-            </button>
-            <button className="btn btn-secondary" onClick={() => navigate('/eczane-ekle')}>
-              + Eczane Ekle
-            </button>
-          </>
-        )}
+        <button className="btn btn-secondary" onClick={() => navigate('/ilac-ekle')}>
+          + Stok Ekle
+        </button>
+        <button className="btn btn-secondary" onClick={() => navigate('/eczane-ekle')}>
+          + Eczane Ekle
+        </button>
         <button className="btn btn-ghost" onClick={() => navigate('/')}>
           Kargo Sorgula
         </button>

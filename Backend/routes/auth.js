@@ -2,30 +2,44 @@ const express=require('express');
 const router=express.Router();
 const bcrypt=require('bcryptjs');
 const jwt=require('jsonwebtoken');
+const rateLimit=require('express-rate-limit');
 const User=require('../models/User');
 const Eczane=require('../models/Eczane');
+const auth=require('../middleware/auth');
+const yetkiKontrol=require('../middleware/yetkiKontrol');
 
-//KAYIT
-router.post('/register', async (req, res) => {
+// brute-force koruması: 15 dakikada aynı IP'den en fazla 10 giriş/kayıt denemesi
+const girisLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 10,
+    message: { mesaj: 'Çok fazla deneme yaptınız, lütfen daha sonra tekrar deneyin' },
+    standardHeaders: true,
+    legacyHeaders: false
+});
+
+//KAYIT (herkese açık - SADECE eczane hesabı oluşturur)
+// personel hesapları buradan açılamaz, bkz. /personel-ekle (korumalı endpoint)
+router.post('/register', girisLimiter, async (req, res) => {
     try {
-        const { username, password, role, eczaneAdi, yetkiliKisi, telefon, adres, vergiNo } = req.body;
+        const { username, password, eczaneAdi, yetkiliKisi, telefon, adres, vergiNo } = req.body;
+
+        if (typeof username !== 'string' || typeof password !== 'string' || !username.trim() || !password) {
+            return res.status(400).json({ mesaj: 'Kullanıcı adı ve şifre zorunludur' });
+        }
 
         const mevcutKullanici = await User.findOne({ username });
         if (mevcutKullanici) {
             return res.status(400).json({ mesaj: 'Kullanıcı adı zaten mevcut' });
         }
 
-        const gercekRol = role === 'eczane' ? 'eczane' : 'personel'; // güvenlik: sadece bu iki değer kabul edilir
+        const gercekRol = 'eczane'; // güvenlik: herkese açık kayıt her zaman eczane rolü oluşturur
 
-        let eczaneId = null;
-        if (gercekRol === 'eczane') {
-            if (!eczaneAdi || !adres) {
-                return res.status(400).json({ mesaj: 'Eczane adı ve adres zorunludur' });
-            }
-            const yeniEczane = new Eczane({ eczaneAdi, yetkiliKisi, telefon, adres, vergiNo });
-            await yeniEczane.save();
-            eczaneId = yeniEczane._id;
+        if (!eczaneAdi || !adres) {
+            return res.status(400).json({ mesaj: 'Eczane adı ve adres zorunludur' });
         }
+        const yeniEczane = new Eczane({ eczaneAdi, yetkiliKisi, telefon, adres, vergiNo });
+        await yeniEczane.save();
+        const eczaneId = yeniEczane._id;
 
         const salt = await bcrypt.genSalt(10);
         const hashliSifre = await bcrypt.hash(password, salt);
@@ -43,9 +57,13 @@ router.post('/register', async (req, res) => {
 });
 
 //GİRİŞ
-router.post('/login',async(req,res)=>{
+router.post('/login', girisLimiter, async(req,res)=>{
     try{
         const{username,password}=req.body;
+
+        if (typeof username !== 'string' || typeof password !== 'string') {
+            return res.status(400).json({mesaj:'Kullanıcı adı veya şifre hatalı'});
+        }
 
         const kullanici=await User.findOne({username});
         if(!kullanici){
@@ -72,6 +90,34 @@ router.post('/login',async(req,res)=>{
         });
     } catch (err) {
         res.status(500).json({mesaj:'Sunucu hatası',hata:err.message});
+    }
+});
+
+//PERSONEL EKLE (korumalı - sadece giriş yapmış personel çağırabilir)
+router.post('/personel-ekle', auth, yetkiKontrol('personel'), async (req, res) => {
+    try {
+        const { username, password } = req.body;
+
+        if (typeof username !== 'string' || typeof password !== 'string' || !username.trim() || !password) {
+            return res.status(400).json({ mesaj: 'Kullanıcı adı ve şifre zorunludur' });
+        }
+
+        const mevcutKullanici = await User.findOne({ username });
+        if (mevcutKullanici) {
+            return res.status(400).json({ mesaj: 'Kullanıcı adı zaten mevcut' });
+        }
+
+        const salt = await bcrypt.genSalt(10);
+        const hashliSifre = await bcrypt.hash(password, salt);
+        const yeniPersonel = new User({
+            username,
+            password: hashliSifre,
+            role: 'personel'
+        });
+        await yeniPersonel.save();
+        res.status(201).json({ mesaj: 'Personel hesabı oluşturuldu' });
+    } catch (err) {
+        res.status(500).json({ mesaj: 'Sunucu hatası', hata: err.message });
     }
 });
 
