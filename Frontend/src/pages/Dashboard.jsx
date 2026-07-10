@@ -12,10 +12,10 @@ const DURUM_RENK = {
 };
 
 const AKIS_ADIMLARI = [
-  { key: 'eczane', baslik: 'Eczane', aciklama: 'Kayıtlı müşteri', sayfa: '/eczaneler' },
-  { key: 'siparis', baslik: 'Sipariş', aciklama: 'Beklemede', sayfa: '/siparisler' },
-  { key: 'stok', baslik: 'Depo', aciklama: 'Onaylanır, stok düşer', sayfa: '/ilaclar' },
-  { key: 'kargo', baslik: 'Sevkiyat', aciklama: 'Takip edilir', sayfa: '/kargolar' }
+  { key: 'eczane', baslik: 'Eczane', aciklama: 'Kayıtlı müşteri', sayfa: '/eczaneler', sadecePersonel: true },
+  { key: 'siparis', baslik: 'Sipariş', aciklama: 'Beklemede', sayfa: '/siparisler', sadecePersonel: false },
+  { key: 'stok', baslik: 'Depo', aciklama: 'Onaylanır, stok düşer', sayfa: '/ilaclar', sadecePersonel: true },
+  { key: 'kargo', baslik: 'Sevkiyat', aciklama: 'Takip edilir', sayfa: '/kargolar', sadecePersonel: false }
 ];
 
 function Dashboard() {
@@ -33,16 +33,18 @@ function Dashboard() {
       .catch((err) => console.error('İstatistik getirilemedi:', err))
       .finally(() => setYukleniyor(false));
 
-    api.get('/ilac')
-      .then((res) => {
-        const kritik = res.data.filter((i) => i.stokMiktari <= i.kritikStokSeviyesi).length;
-        setKritikStokSayisi(kritik);
-      })
-      .catch((err) => console.error('İlaçlar getirilemedi:', err));
+    if (role === 'personel') {
+      api.get('/ilac')
+        .then((res) => {
+          const kritik = res.data.filter((i) => i.stokMiktari <= i.kritikStokSeviyesi).length;
+          setKritikStokSayisi(kritik);
+        })
+        .catch((err) => console.error('İlaçlar getirilemedi:', err));
 
-    api.get('/eczane')
-      .then((res) => setEczaneSayisi(res.data.length))
-      .catch((err) => console.error('Eczaneler getirilemedi:', err));
+      api.get('/eczane')
+        .then((res) => setEczaneSayisi(res.data.length))
+        .catch((err) => console.error('Eczaneler getirilemedi:', err));
+    }
 
     api.get('/siparis')
       .then((res) => {
@@ -50,7 +52,7 @@ function Dashboard() {
         setBekleyenSiparisSayisi(bekleyen);
       })
       .catch((err) => console.error('Siparişler getirilemedi:', err));
-  }, []);
+  }, [role]);
 
   const akisSayilari = {
     eczane: eczaneSayisi,
@@ -68,6 +70,7 @@ function Dashboard() {
   }
 
   const maxDeger = Math.max(...Object.values(ozet.durumDagilimi), 1);
+  const gorunecekAdimlar = AKIS_ADIMLARI.filter((adim) => !adim.sadecePersonel || role === 'personel');
 
   return (
     <div className="page">
@@ -81,7 +84,7 @@ function Dashboard() {
           SÜREÇ AKIŞI
         </div>
         <div className="akis-satiri">
-          {AKIS_ADIMLARI.map((adim, i) => (
+          {gorunecekAdimlar.map((adim, i) => (
             <div key={adim.key} style={{ display: 'flex', alignItems: 'center', flex: 1 }}>
               <div
                 className="akis-adim"
@@ -91,7 +94,7 @@ function Dashboard() {
                 <div className="akis-adim-baslik">{adim.baslik}</div>
                 <div className="akis-adim-aciklama">{adim.aciklama}</div>
               </div>
-              {i < AKIS_ADIMLARI.length - 1 && <div className="akis-ok">→</div>}
+              {i < gorunecekAdimlar.length - 1 && <div className="akis-ok">→</div>}
             </div>
           ))}
         </div>

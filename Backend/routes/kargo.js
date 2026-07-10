@@ -1,21 +1,54 @@
 const express = require('express');
 const router = express.Router();
 const Kargo = require('../models/Kargo');
+const Siparis = require('../models/Siparis');
 const auth = require('../middleware/auth');
+const yetkiKontrol = require('../middleware/yetkiKontrol');
 
-// TÜM KARGOLARI LİSTELE (herkes görebilir - sorgulama için)
-router.get('/', async (req, res) => {
+// TÜM KARGOLARI LİSTELE
+// personel: hepsini görür / eczane: sadece kendi siparişlerinden doğan sevkiyatları görür
+router.get('/', auth, async (req, res) => {
   try {
+    if (req.user.role === 'eczane') {
+      if (!req.user.eczane) {
+        return res.json([]);
+      }
+      const kendiSiparisleri = await Siparis.find({
+        eczane: req.user.eczane,
+        kargo: { $ne: null }
+      }).select('kargo');
+
+      const kargoIdleri = kendiSiparisleri.map((s) => s.kargo);
+      const kargolar = await Kargo.find({ _id: { $in: kargoIdleri } }).sort({ createdAt: -1 });
+      return res.json(kargolar);
+    }
+
     const kargolar = await Kargo.find().sort({ createdAt: -1 });
     res.json(kargolar);
   } catch (err) {
     res.status(500).json({ mesaj: 'Sunucu hatası', hata: err.message });
   }
 });
-// İSTATİSTİK ÖZETİ (herkes görebilir, dashboard için kullanılacak)
-router.get('/istatistik/ozet', async (req, res) => {
+
+// İSTATİSTİK ÖZETİ (dashboard için)
+// personel: genel toplam / eczane: sadece kendi sevkiyatlarına göre
+router.get('/istatistik/ozet', auth, async (req, res) => {
   try {
-    const tumKargolar = await Kargo.find();
+    let tumKargolar;
+
+    if (req.user.role === 'eczane') {
+      if (!req.user.eczane) {
+        return res.json({ toplam: 0, durumDagilimi: {} });
+      }
+      const kendiSiparisleri = await Siparis.find({
+        eczane: req.user.eczane,
+        kargo: { $ne: null }
+      }).select('kargo');
+      const kargoIdleri = kendiSiparisleri.map((s) => s.kargo);
+      tumKargolar = await Kargo.find({ _id: { $in: kargoIdleri } });
+    } else {
+      tumKargolar = await Kargo.find();
+    }
 
     const ozet = {
       toplam: tumKargolar.length,
@@ -32,7 +65,8 @@ router.get('/istatistik/ozet', async (req, res) => {
     res.status(500).json({ mesaj: 'Sunucu hatası', hata: err.message });
   }
 });
-// TAKİP NUMARASINA GÖRE TEK KARGO SORGULA (herkes görebilir)
+
+// TAKİP NUMARASINA GÖRE TEK KARGO SORGULA (herkes görebilir, giriş gerekmez)
 router.get('/:takipNo', async (req, res) => {
   try {
     const kargo = await Kargo.findOne({ takipNo: req.params.takipNo });
@@ -46,7 +80,7 @@ router.get('/:takipNo', async (req, res) => {
 });
 
 // YENİ KARGO EKLE (sadece giriş yapmış personel)
-router.post('/', auth, async (req, res) => {
+router.post('/', auth, yetkiKontrol('personel'), async (req, res) => {
   try {
     const { takipNo, gonderen, alici, adres, durum } = req.body;
 
@@ -63,7 +97,7 @@ router.post('/', auth, async (req, res) => {
 });
 
 // KARGO DURUMUNU GÜNCELLE (sadece giriş yapmış personel)
-router.put('/:id', auth, async (req, res) => {
+router.put('/:id', auth, yetkiKontrol('personel'), async (req, res) => {
   try {
     const guncelKargo = await Kargo.findByIdAndUpdate(
       req.params.id,
@@ -82,7 +116,7 @@ router.put('/:id', auth, async (req, res) => {
 });
 
 // KARGO SİL (sadece giriş yapmış personel)
-router.delete('/:id', auth, async (req, res) => {
+router.delete('/:id', auth, yetkiKontrol('personel'), async (req, res) => {
   try {
     const silinenKargo = await Kargo.findByIdAndDelete(req.params.id);
 
@@ -95,7 +129,5 @@ router.delete('/:id', auth, async (req, res) => {
     res.status(500).json({ mesaj: 'Sunucu hatası', hata: err.message });
   }
 });
-
-
 
 module.exports = router;
