@@ -89,24 +89,3 @@ amaçlamaktadır.
 * Database → MongoDB Atlas
 
 ---
-
-# 📁 Proje Yapısı
-
-```text
-project/
-│
-├── backend/
-│   ├── models/
-│   ├── routes/
-│   ├── middleware/
-│   ├── server.js
-│   └── .env
-│
-├── frontend/
-│   ├── src/
-│   ├── components/
-│   ├── pages/
-│   └── App.js
-│
-└── README.md
-```
