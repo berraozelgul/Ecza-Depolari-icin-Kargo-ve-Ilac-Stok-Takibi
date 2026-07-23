@@ -62,14 +62,14 @@ function SiparisOlustur() {
     }
 
     try {
-      await api.post('/siparis', {
+      const res=await api.post('/siparis', {
         eczane: seciliEczane, // eczane rolündeyse backend zaten bunu yok sayıp kendi eczanesini kullanır
         urunler: urunler.map((u) => ({ ilac: u.ilac, miktar: Number(u.miktar) }))
       });
       showToast('Sipariş başarıyla oluşturuldu', 'success');
       setSeciliEczane(kendiEczaneMi ? seciliEczane : '');
       setUrunler([{ ilac: '', miktar: 1 }]);
-      navigate('/siparisler');
+      navigate(`/odeme/${res.data.siparis._id}`);
     } catch (err) {
       setHata(err.response?.data?.mesaj || 'Sipariş oluşturulurken bir hata oluştu');
     }

@@ -8,8 +8,8 @@ const siparisSchema = new mongoose.Schema({
   }],
   durum: {
     type: String,
-    enum: ['Beklemede', 'Onaylandı', 'Hazırlanıyor', 'Sevk Edildi', 'Teslim Edildi', 'İptal'],
-    default: 'Beklemede',
+    enum: ['Odeme Bekleniyor', 'Odeme Basarisiz', 'Beklemede', 'Onaylandı','Hazırlanıyor','Sevk Edildi', 'Teslim Edildi', 'İptal'],
+    default: 'Odeme Bekleniyor',
   },
   kargo: { type: mongoose.Schema.Types.ObjectId, ref: 'Kargo' },
 }, { timestamps: true });

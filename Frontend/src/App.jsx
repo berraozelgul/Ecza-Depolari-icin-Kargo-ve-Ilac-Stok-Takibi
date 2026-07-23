@@ -35,7 +35,7 @@ import EczaneEkle from './pages/EczaneEkle';
 import SiparisListesi from './pages/SiparisListesi';
 import SiparisOlustur from './pages/SiparisOlustur';
 import GerekliGiris from './components/GerekliGiris';
-
+import Odeme from './pages/Odeme';
 function App() {
   return (
     <BrowserRouter>
@@ -54,6 +54,7 @@ function App() {
         <Route path="/siparis-olustur" element={<GerekliGiris><SiparisOlustur /></GerekliGiris>} />
         <Route path="/ilac-duzenle/:id" element={<GerekliGiris><IlacDuzenle /></GerekliGiris>} />
 <Route path="/eczane-duzenle/:id" element={<GerekliGiris><EczaneDuzenle /></GerekliGiris>} />
+<Route path="/odeme/:siparisId" element={<GerekliGiris><Odeme /></GerekliGiris>} />
       </Routes>
     </BrowserRouter>
   );

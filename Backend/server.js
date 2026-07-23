@@ -19,6 +19,7 @@ app.use('/api/siparis', require('./routes/siparis'));
 app.use('/api/eczane', require('./routes/eczane'));
 app.use('/api/ilac', require('./routes/ilac'));
 
+
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('MongoDB bağlantısı başarılı'))
   .catch((err) => console.log('MongoDB bağlantı hatası:', err));
@@ -29,6 +30,7 @@ app.get('/', (req, res) => {
 
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/kargo', require('./routes/kargo'));
+app.use('/api/paytr', require('./routes/paytr'));
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
