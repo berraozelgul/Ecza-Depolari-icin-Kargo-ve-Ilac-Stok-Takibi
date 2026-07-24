@@ -101,8 +101,7 @@ function Odeme() {
         style={{
           padding: '24px 28px',
           marginBottom: '16px',
-          background: 'linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%)',
-          border: 'none',
+          background: 'linear-gradient(135deg, #3B2E5A 0%, #241C3D 100%)',
           color: '#fff',
         }}
       >
@@ -116,13 +115,7 @@ function Odeme() {
       </div>
 
       {/* Simülasyon uyarısı */}
-      <div
-        className="alert"
-        style={{ background: '#FCF0DD', color: '#B4690E', marginBottom: '16px', display: 'flex', gap: '8px', alignItems: 'flex-start' }}
-      >
-        <span>⚠</span>
-        <span>Bu bir simülasyondur, gerçek kart bilgisi girilmiyor ve hiçbir yere gönderilmiyor.</span>
-      </div>
+     
 
       {/* Kart formu */}
       <div className="card" style={{ padding: '28px' }}>
